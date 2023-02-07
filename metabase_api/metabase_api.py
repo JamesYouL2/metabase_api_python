@@ -101,7 +101,7 @@ class Metabase_API():
         '''
         Return the info for the given item.
         Use 'params' for providing arguments. E.g. to include tables in the result for databases, use: params={'include':'tables'}
-        '''    
+        '''
 
         assert item_type in ['database', 'table', 'card', 'collection', 'dashboard', 'pulse', 'segment']
 
@@ -140,18 +140,18 @@ class Metabase_API():
         if item_type in ['card', 'dashboard', 'pulse']:
             if not collection_id:
                 if not collection_name:
-                    # Collection name/id is not provided. Searching in all collections 
-                    item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name 
+                    # Collection name/id is not provided. Searching in all collections
+                    item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name
                                                                                         and i['archived'] == False ]
                 else:
                     collection_id = self.get_item_id('collection', collection_name) if collection_name != 'root' else None
-                    item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name 
-                                                                                        and i['collection_id'] == collection_id 
+                    item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name
+                                                                                        and i['collection_id'] == collection_id
                                                                                         and i['archived'] == False ]
             else:
                 collection_name = self.get_item_name('collection', collection_id)
-                item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name 
-                                                                                    and i['collection_id'] == collection_id 
+                item_IDs = [ i['id'] for i in self.get("/api/{}/".format(item_type)) if i['name'] == item_name
+                                                                                    and i['collection_id'] == collection_id
                                                                                     and i['archived'] == False ]
 
             if len(item_IDs) > 1:
@@ -166,7 +166,7 @@ class Metabase_API():
                 raise ValueError('There is no item with the name "{}" in the collection "{}"'
                                 .format(item_name, collection_name))
 
-            return item_IDs[0] 
+            return item_IDs[0]
 
 
         if item_type == 'collection':
@@ -177,7 +177,7 @@ class Metabase_API():
             if len(collection_IDs) == 0:
                 raise ValueError('There is no collection with the name "{}"'.format(item_name))
 
-            return collection_IDs[0] 
+            return collection_IDs[0]
 
 
         if item_type == 'database':
@@ -213,7 +213,7 @@ class Metabase_API():
 
 
         if item_type == 'segment':
-            segment_IDs = [ i['id'] for i in self.get("/api/segment/") if i['name'] == item_name 
+            segment_IDs = [ i['id'] for i in self.get("/api/segment/") if i['name'] == item_name
                                                                         and (not table_id or i['table_id'] == table_id) ]
             if len(segment_IDs) > 1:
                 raise ValueError('There is more than one segment with the name "{}"'.format(item_name))
@@ -235,7 +235,7 @@ class Metabase_API():
         if len(collection_IDs) == 0:
             raise ValueError('There is no collection with the name "{}"'.format(collection_name))
 
-        return collection_IDs[0] 
+        return collection_IDs[0]
 
 
 
@@ -283,7 +283,7 @@ class Metabase_API():
         import warnings
         warnings.warn("The function get_segment_id will be removed in the next version. Use get_item_id function instead.", DeprecationWarning)
 
-        segment_IDs = [ i['id'] for i in self.get("/api/segment/") if i['name'] == segment_name 
+        segment_IDs = [ i['id'] for i in self.get("/api/segment/") if i['name'] == segment_name
                                                                     and (not table_id or i['table_id'] == table_id) ]
         if len(segment_IDs) > 1:
             raise ValueError('There is more than one segment with the name "{}"'.format(segment_name))
@@ -360,26 +360,26 @@ class Metabase_API():
                     table_id = self.get_item_id('table', table_name)
                 db_id = self.get_db_id_from_table_id(table_id)
 
-        # Get column names and IDs 
+        # Get column names and IDs
         if column_id_name:
-            return {i['id']: i['name'] for i in self.get("/api/database/{}/fields".format(db_id)) 
+            return {i['id']: i['name'] for i in self.get("/api/database/{}/fields".format(db_id))
                                                                  if i['table_name'] == table_name}
         else:
-            return {i['name']: i['id'] for i in self.get("/api/database/{}/fields".format(db_id)) 
+            return {i['name']: i['id'] for i in self.get("/api/database/{}/fields".format(db_id))
                                                                  if i['table_name'] == table_name}
 
 
 
     def friendly_names_is_disabled(self):
         '''
-        The endpoint /api/database/:db-id/fields which is used in the function get_columns_name_id relies on the display name of fields. 
+        The endpoint /api/database/:db-id/fields which is used in the function get_columns_name_id relies on the display name of fields.
         If "Friendly Table and Field Names" (in Admin Panel > Settings > General) is not disabled, it changes the display name of fields.
         So it is important to make sure this setting is disabled, before running the get_columns_name_id function.
         '''
-        # checking whether friendly_name is disabled required admin access. 
+        # checking whether friendly_name is disabled required admin access.
         # So to let non-admin users also use this package we skip this step for them.
         # There is warning in the __init__ method for these users.
-        if not self.is_admin:  
+        if not self.is_admin:
             return True
 
         friendly_name_setting = [ i['value'] for i in self.get('/api/setting') if i['key'] == 'humanization-strategy' ][0]
@@ -398,22 +398,22 @@ class Metabase_API():
     ###################### Custom Functions ##########################
     ##################################################################
 
-    def create_card(self, card_name=None, collection_name=None, collection_id=None, 
-                    db_name=None, db_id=None, table_name=None,    table_id=None, 
+    def create_card(self, card_name=None, collection_name=None, collection_id=None,
+                    db_name=None, db_id=None, table_name=None,    table_id=None,
                     column_order='db_table_order', custom_json=None, verbose=False, return_card=False):
         """
-        Create a card using the given arguments utilizing the endpoint 'POST /api/card/'. 
+        Create a card using the given arguments utilizing the endpoint 'POST /api/card/'.
         If collection is not given, the root collection is used.
 
         Keyword arguments:
-        card_name -- the name used to create the card (default None) 
+        card_name -- the name used to create the card (default None)
         collection_name -- name of the collection to place the card (default None).
-        collection_id -- id of the collection to place the card (default None) 
-        db_name -- name of the db that is used as the source of data (default None)    
-        db_id -- id of the db used as the source of data (default None) 
+        collection_id -- id of the collection to place the card (default None)
+        db_name -- name of the db that is used as the source of data (default None)
+        db_id -- id of the db used as the source of data (default None)
         table_name -- name of the table used as the source of data (default None)
-        table_id -- id of the table used as the source of data (default None) 
-        column_order -- order for showing columns. Accepted values are 'alphabetical', 'db_table_order' (default) 
+        table_id -- id of the table used as the source of data (default None)
+        column_order -- order for showing columns. Accepted values are 'alphabetical', 'db_table_order' (default)
                                         or a list of column names
         custom_json -- key-value pairs that can provide some or all the data needed for creating the card (default None).
                                      If you are providing only this argument, the keys 'name', 'dataset_query' and 'display' are required
@@ -432,7 +432,7 @@ class Metabase_API():
                     break
 
             # Fix for the issue #10
-            if custom_json.get('description') == '': 
+            if custom_json.get('description') == '':
                 custom_json['description'] = None
 
             # Set the collection
@@ -457,7 +457,7 @@ class Metabase_API():
                 if not custom_json.get('collection_id'):
                     self.verbose_print(verbose, 'No collection name or id is provided. Will create the card at the root ...')
 
-                # Create the card using only the provided custom_json 
+                # Create the card using only the provided custom_json
                 res = self.post("/api/card/", json=custom_json)
                 if res and not res.get('error'):
                     self.verbose_print(verbose, 'The card was created successfully.')
@@ -487,9 +487,9 @@ class Metabase_API():
 
         if type(column_order) == list:
 
-            column_name_id_dict = self.get_columns_name_id( db_id=db_id, 
-                                                            table_id=table_id, 
-                                                            table_name=table_name, 
+            column_name_id_dict = self.get_columns_name_id( db_id=db_id,
+                                                            table_id=table_id,
+                                                            table_name=table_name,
                                                             verbose=verbose)
             try:
                 column_id_list = [column_name_id_dict[i] for i in column_order]
@@ -510,7 +510,7 @@ class Metabase_API():
                             'name': '{0}',
                             'visualization_settings': {{}} }}""".format(card_name, db_id, table_name)
 
-            res = self.post("/api/card/", json=eval(json_str))    
+            res = self.post("/api/card/", json=eval(json_str))
             if not res:
                 print('Card Creation Failed!')
                 return res
@@ -518,11 +518,11 @@ class Metabase_API():
 
             # Delete the temporary card
             card_id = res['id']
-            self.delete("/api/card/{}".format(card_id))    
+            self.delete("/api/card/{}".format(card_id))
 
-            column_name_id_dict = self.get_columns_name_id(db_id=db_id, 
-                                                           table_id=table_id, 
-                                                           table_name=table_name, 
+            column_name_id_dict = self.get_columns_name_id(db_id=db_id,
+                                                           table_id=table_id,
+                                                           table_name=table_name,
                                                            verbose=verbose)
             column_id_list = [ column_name_id_dict[i] for i in ordered_columns ]
             column_id_list_str = [ ['field-id', i] for i in column_id_list ]
@@ -575,7 +575,7 @@ class Metabase_API():
 
     def create_collection(self, collection_name, parent_collection_id=None, parent_collection_name=None, return_results=False):
         """
-        Create an empty collection, in the given location, utilizing the endpoint 'POST /api/collection/'. 
+        Create an empty collection, in the given location, utilizing the endpoint 'POST /api/collection/'.
 
         Keyword arguments:
         collection_name -- the name used for the created collection.
@@ -598,20 +598,20 @@ class Metabase_API():
 
 
 
-    def create_segment(self, segment_name, column_name, column_values, segment_description='', 
+    def create_segment(self, segment_name, column_name, column_values, segment_description='',
                        db_name=None, db_id=None, table_name=None, table_id=None, return_segment=False):
         """
-        Create a segment using the given arguments utilizing the endpoint 'POST /api/segment/'. 
+        Create a segment using the given arguments utilizing the endpoint 'POST /api/segment/'.
 
         Keyword arguments:
         segment_name -- the name used for the created segment.
         column_name -- name of the column used for filtering.
         column_values -- list of values for filtering in the given column.
-        segment_description -- description of the segment (default '') 
-        db_name -- name of the db that is used as the source of data (default None)    
-        db_id -- id of the db used as the source of data (default None) 
-        table_name -- name of the table used for creating the segmnet on it (default None)    
-        table_id -- id of the table used for creating the segmnet on it (default None)    
+        segment_description -- description of the segment (default '')
+        db_name -- name of the db that is used as the source of data (default None)
+        db_id -- id of the db used as the source of data (default None)
+        table_name -- name of the table used for creating the segmnet on it (default None)
+        table_id -- id of the table used for creating the segmnet on it (default None)
         return_segment --    whather to return the created segment info (default False)
         """
         # Making sure we have the data needed
@@ -642,34 +642,34 @@ class Metabase_API():
 
 
 
-    def copy_card(self, source_card_name=None, source_card_id=None, 
+    def copy_card(self, source_card_name=None, source_card_id=None,
                   source_collection_name=None, source_collection_id=None,
-                  destination_card_name=None, 
+                  destination_card_name=None,
                   destination_collection_name=None, destination_collection_id=None,
                   postfix='', verbose=False):
         """
-        Copy the card with the given name/id to the given destination collection. 
+        Copy the card with the given name/id to the given destination collection.
 
         Keyword arguments:
-        source_card_name -- name of the card to copy (default None) 
-        source_card_id -- id of the card to copy (default None) 
-        source_collection_name -- name of the collection the source card is located in (default None) 
-        source_collection_id -- id of the collection the source card is located in (default None) 
+        source_card_name -- name of the card to copy (default None)
+        source_card_id -- id of the card to copy (default None)
+        source_collection_name -- name of the collection the source card is located in (default None)
+        source_collection_id -- id of the collection the source card is located in (default None)
         destination_card_name -- name used for the card in destination (default None).
                                                          If None, it will use the name of the source card + postfix.
-        destination_collection_name -- name of the collection to copy the card to (default None) 
-        destination_collection_id -- id of the collection to copy the card to (default None) 
-        postfix -- if destination_card_name is None, adds this string to the end of source_card_name 
+        destination_collection_name -- name of the collection to copy the card to (default None)
+        destination_collection_id -- id of the collection to copy the card to (default None)
+        postfix -- if destination_card_name is None, adds this string to the end of source_card_name
                              to make destination_card_name
         """
-        ### Making sure we have the data that we need 
+        ### Making sure we have the data that we need
         if not source_card_id:
             if not source_card_name:
                 raise ValueError('Either the name or id of the source card must be provided.')
             else:
                 source_card_id = self.get_item_id(item_type='card',
-                                                  item_name=source_card_name, 
-                                                  collection_id=source_collection_id, 
+                                                  item_name=source_card_name,
+                                                  collection_id=source_collection_id,
                                                   collection_name=source_collection_name)
 
         if not destination_collection_id:
@@ -692,7 +692,7 @@ class Metabase_API():
         card_json['name'] = destination_card_name
 
         # Fix the issue #10
-        if card_json.get('description') == '': 
+        if card_json.get('description') == '':
             card_json['description'] = None
 
         # Save as a new card
@@ -703,32 +703,32 @@ class Metabase_API():
 
 
 
-    def copy_pulse(self, source_pulse_name=None, source_pulse_id=None, 
+    def copy_pulse(self, source_pulse_name=None, source_pulse_id=None,
                    source_collection_name=None, source_collection_id=None,
-                   destination_pulse_name=None, 
+                   destination_pulse_name=None,
                    destination_collection_id=None, destination_collection_name=None, postfix=''):
         """
-        Copy the pulse with the given name/id to the given destination collection. 
+        Copy the pulse with the given name/id to the given destination collection.
 
         Keyword arguments:
-        source_pulse_name -- name of the pulse to copy (default None) 
-        source_pulse_id -- id of the pulse to copy (default None) 
-        source_collection_name -- name of the collection the source card is located in (default None) 
-        source_collection_id -- id of the collection the source card is located in (default None) 
+        source_pulse_name -- name of the pulse to copy (default None)
+        source_pulse_id -- id of the pulse to copy (default None)
+        source_collection_name -- name of the collection the source card is located in (default None)
+        source_collection_id -- id of the collection the source card is located in (default None)
         destination_pulse_name -- name used for the pulse in destination (default None).
                                                          If None, it will use the name of the source pulse + postfix.
-        destination_collection_name -- name of the collection to copy the pulse to (default None) 
-        destination_collection_id -- id of the collection to copy the pulse to (default None) 
-        postfix -- if destination_pulse_name is None, adds this string to the end of source_pulse_name 
+        destination_collection_name -- name of the collection to copy the pulse to (default None)
+        destination_collection_id -- id of the collection to copy the pulse to (default None)
+        postfix -- if destination_pulse_name is None, adds this string to the end of source_pulse_name
                              to make destination_pulse_name
         """
-        ### Making sure we have the data that we need 
+        ### Making sure we have the data that we need
         if not source_pulse_id:
             if not source_pulse_name:
                 raise ValueError('Either the name or id of the source pulse must be provided.')
             else:
-                source_pulse_id = self.get_item_id(item_type='pulse',item_name=source_pulse_name, 
-                                                    collection_id=source_collection_id, 
+                source_pulse_id = self.get_item_id(item_type='pulse',item_name=source_pulse_name,
+                                                    collection_id=source_collection_id,
                                                     collection_name=source_collection_name)
 
         if not destination_collection_id:
@@ -755,36 +755,36 @@ class Metabase_API():
 
 
 
-    def copy_dashboard(self, source_dashboard_name=None, source_dashboard_id=None, 
+    def copy_dashboard(self, source_dashboard_name=None, source_dashboard_id=None,
                        source_collection_name=None, source_collection_id=None,
-                       destination_dashboard_name=None, 
+                       destination_dashboard_name=None,
                        destination_collection_name=None, destination_collection_id=None,
                        deepcopy=False, postfix=''):
         """
-        Copy the dashboard with the given name/id to the given destination collection. 
+        Copy the dashboard with the given name/id to the given destination collection.
 
         Keyword arguments:
-        source_dashboard_name -- name of the dashboard to copy (default None) 
-        source_dashboard_id -- id of the dashboard to copy (default None) 
-        source_collection_name -- name of the collection the source dashboard is located in (default None) 
-        source_collection_id -- id of the collection the source dashboard is located in (default None) 
+        source_dashboard_name -- name of the dashboard to copy (default None)
+        source_dashboard_id -- id of the dashboard to copy (default None)
+        source_collection_name -- name of the collection the source dashboard is located in (default None)
+        source_collection_id -- id of the collection the source dashboard is located in (default None)
         destination_dashboard_name -- name used for the dashboard in destination (default None).
                                                                     If None, it will use the name of the source dashboard + postfix.
-        destination_collection_name -- name of the collection to copy the dashboard to (default None) 
-        destination_collection_id -- id of the collection to copy the dashboard to (default None) 
+        destination_collection_name -- name of the collection to copy the dashboard to (default None)
+        destination_collection_id -- id of the collection to copy the dashboard to (default None)
         deepcopy -- whether to duplicate the cards inside the dashboard (default False).
-                                If True, puts the duplicated cards in a collection called "[dashboard_name]'s cards" 
+                                If True, puts the duplicated cards in a collection called "[dashboard_name]'s cards"
                                 in the same path as the duplicated dashboard.
-        postfix -- if destination_dashboard_name is None, adds this string to the end of source_dashboard_name 
+        postfix -- if destination_dashboard_name is None, adds this string to the end of source_dashboard_name
                              to make destination_dashboard_name
         """
-        ### making sure we have the data that we need 
+        ### making sure we have the data that we need
         if not source_dashboard_id:
             if not source_dashboard_name:
                 raise ValueError('Either the name or id of the source dashboard must be provided.')
             else:
-                source_dashboard_id = self.get_item_id(item_type='dashboard',item_name=source_dashboard_name, 
-                                                       collection_id=source_collection_id, 
+                source_dashboard_id = self.get_item_id(item_type='dashboard',item_name=source_dashboard_name,
+                                                       collection_id=source_collection_id,
                                                        collection_name=source_collection_name)
 
         if not destination_collection_id:
@@ -809,9 +809,9 @@ class Metabase_API():
             source_dashboard = self.get('/api/dashboard/{}'.format(source_dashboard_id))
 
             # create an empty collection to copy the cards into it
-            res = self.post('/api/collection/', 
-                            json={'name':destination_dashboard_name + "'s cards", 
-                                  'color':'#509EE3', 
+            res = self.post('/api/collection/',
+                            json={'name':destination_dashboard_name + "'s cards",
+                                  'color':'#509EE3',
                                   'parent_id':destination_collection_id})
             cards_collection_id = res['id']
 
@@ -848,31 +848,31 @@ class Metabase_API():
 
 
 
-    def copy_collection(self, source_collection_name=None, source_collection_id=None, 
+    def copy_collection(self, source_collection_name=None, source_collection_id=None,
                         destination_collection_name=None,
-                        destination_parent_collection_name=None, destination_parent_collection_id=None, 
+                        destination_parent_collection_name=None, destination_parent_collection_id=None,
                         deepcopy_dashboards=False, postfix='', child_items_postfix='', verbose=False):
         """
-        Copy the collection with the given name/id into the given destination parent collection. 
+        Copy the collection with the given name/id into the given destination parent collection.
 
         Keyword arguments:
-        source_collection_name -- name of the collection to copy (default None) 
-        source_collection_id -- id of the collection to copy (default None) 
+        source_collection_name -- name of the collection to copy (default None)
+        source_collection_id -- id of the collection to copy (default None)
         destination_collection_name -- the name to be used for the collection in the destination (default None).
                                                                      If None, it will use the name of the source collection + postfix.
-        destination_parent_collection_name -- name of the destination parent collection (default None). 
+        destination_parent_collection_name -- name of the destination parent collection (default None).
                                                                                     This is the collection that would have the copied collection as a child.
                                                                                     use 'Root' for the root collection.
         destination_parent_collection_id -- id of the destination parent collection (default None).
                                                                                 This is the collection that would have the copied collection as a child.
-        deepcopy_dashboards -- whether to duplicate the cards inside the dashboards (default False). 
-                                                     If True, puts the duplicated cards in a collection called "[dashboard_name]'s duplicated cards" 
+        deepcopy_dashboards -- whether to duplicate the cards inside the dashboards (default False).
+                                                     If True, puts the duplicated cards in a collection called "[dashboard_name]'s duplicated cards"
                                                      in the same path as the duplicated dashboard.
         postfix -- if destination_collection_name is None, adds this string to the end of source_collection_name to make destination_collection_name.
         child_items_postfix -- this string is added to the end of the child items' names, when saving them in the destination (default '').
-        verbose -- prints extra information (default False) 
+        verbose -- prints extra information (default False)
         """
-        ### making sure we have the data that we need 
+        ### making sure we have the data that we need
         if not source_collection_id:
             if not source_collection_name:
                 raise ValueError('Either the name or id of the source collection must be provided.')
@@ -895,12 +895,12 @@ class Metabase_API():
             destination_collection_name = source_collection_name + postfix
 
         ### create a collection in the destination to hold the contents of the source collection
-        res = self.create_collection(destination_collection_name, 
-                                     parent_collection_id=destination_parent_collection_id, 
+        res = self.create_collection(destination_collection_name,
+                                     parent_collection_id=destination_parent_collection_id,
                                      parent_collection_name=destination_parent_collection_name,
                                      return_results=True
                                     )
-        destination_collection_id = res['id']    
+        destination_collection_id = res['id']
 
         ### get the items to copy
         items = self.get('/api/collection/{}/items'.format(source_collection_id))
@@ -913,7 +913,7 @@ class Metabase_API():
             ## copy a collection
             if item['model'] == 'collection':
                 collection_id = item['id']
-                collection_name = item['name'] 
+                collection_name = item['name']
                 destination_collection_name = collection_name + child_items_postfix
                 self.verbose_print(verbose, 'Copying the collection "{}" ...'.format(collection_name))
                 self.copy_collection(source_collection_id=collection_id,
@@ -957,8 +957,8 @@ class Metabase_API():
 
     def search(self, q, item_type=None, archived=False):
         """
-        Search for Metabase objects and return their basic info. 
-        We can limit the search to a certain item type by providing a value for item_type keyword. 
+        Search for Metabase objects and return their basic info.
+        We can limit the search to a certain item type by providing a value for item_type keyword.
 
         Keyword arguments:
         q -- search input
@@ -978,12 +978,12 @@ class Metabase_API():
 
 
 
-    def get_card_data(self, card_name=None, card_id=None, collection_name=None, 
+    def get_card_data(self, card_name=None, card_id=None, collection_name=None,
                       collection_id=None, data_format='json', parameters=None):
         '''
         Run the query associated with a card and get the results.
         The data_format keyword specifies the format of the returned data:
-            - 'json': every row is a dictionary of <column-header, cell> key-value pairs    
+            - 'json': every row is a dictionary of <column-header, cell> key-value pairs
             - 'csv': the entire result is returned as a string, where rows are separated by newlines and cells with commas.
         To pass the filter values use 'parameters' param:
             The format is like [{"type":"category","value":["val1","val2"],"target":["dimension",["template-tag","filter_variable_name"]]}]
@@ -1016,18 +1016,18 @@ class Metabase_API():
 
 
 
-    def clone_card(self, card_id, 
-                   source_table_id=None, target_table_id=None, 
-                   source_table_name=None, target_table_name=None, 
-                   new_card_name=None, new_card_collection_id=None, 
+    def clone_card(self, card_id,
+                   source_table_id=None, target_table_id=None,
+                   source_table_name=None, target_table_name=None,
+                   new_card_name=None, new_card_collection_id=None,
                    ignore_these_filters=None, return_card=False):
-        """ 
+        """
         *** work in progress ***
-        Create a new card where the source of the old card is changed from 'source_table_id' to 'target_table_id'. 
+        Create a new card where the source of the old card is changed from 'source_table_id' to 'target_table_id'.
         The filters that were based on the old table would become based on the new table.
         In the current version of the function there are some limitations which would be removed in future versions:
             - The column names used in filters need to be the same in the source and target table (except the ones that are ignored by 'ignore_these_filters' param).
-            - The source and target tables need to be in the same DB. 
+            - The source and target tables need to be in the same DB.
 
         Keyword arguments:
         card_id -- id of the card
@@ -1052,7 +1052,7 @@ class Metabase_API():
                 source_table_id = self.get_item_id('table', source_table_name)
 
         if ignore_these_filters:
-            assert type(ignore_these_filters) == list 
+            assert type(ignore_these_filters) == list
 
         # get the card info
         card_info = self.get_item_info('card', card_id)
@@ -1069,7 +1069,7 @@ class Metabase_API():
             if not target_table_name:
                 target_table_name = self.get_item_name('table', target_table_id)
             card_info['dataset_query']['native']['query'] = card_info['dataset_query']['native']['query'].replace(source_table_name, target_table_name)
-            # change filters source 
+            # change filters source
             for filter_variable_name, data in filters_data.items():
                 if ignore_these_filters is not None and filter_variable_name in ignore_these_filters:
                     continue
@@ -1080,26 +1080,26 @@ class Metabase_API():
 
         # simple/custom questions
         elif card_info['dataset_query']['type'] == 'query':
-            
+
             query_data = card_info['dataset_query']['query']
-            
+
             # change the underlying table for the card
             query_data['source-table'] = target_table_id
-            
+
             # transform to string so it is easier to replace the column IDs
             query_data_str = str(query_data)
-            
+
             # find column IDs
             import re
             res = re.findall("\['field', .*?\]", query_data_str)
             source_column_IDs = [ eval(i)[1] for i in res ]
-            
+
             # replace column IDs from old table with the column IDs from new table
             for source_col_id in source_column_IDs:
                 source_col_name = source_table_col_id_name_mapping[source_col_id]
                 target_col_id = target_table_col_name_id_mapping[source_col_name]
                 query_data_str = query_data_str.replace("['field', {}, ".format(source_col_id), "['field', {}, ".format(target_col_id))
-            
+
             card_info['dataset_query']['query'] = eval(query_data_str)
 
         new_card_json = {}
@@ -1123,7 +1123,7 @@ class Metabase_API():
 
 
 
-    def move_to_archive(self, item_type, item_name=None, item_id=None, 
+    def move_to_archive(self, item_type, item_name=None, item_id=None,
                         collection_name=None, collection_id=None, table_id=None, verbose=False):
         '''Archive the given item. For deleting the item use the 'delete_item' function.'''
         assert item_type in ['card', 'dashboard', 'collection', 'pulse', 'segment']
@@ -1145,15 +1145,15 @@ class Metabase_API():
             res = self.put('/api/{}/{}'.format(item_type, item_id), json={'archived':True})
 
         if res in [200, 202]:  # for segments the success status code returned is 200 for others it is 202
-            self.verbose_print(verbose, 'Successfully Archived.')    
-        else: 
+            self.verbose_print(verbose, 'Successfully Archived.')
+        else:
             print('Archiving Failed.')
 
         return res
 
 
 
-    def delete_item(self, item_type, item_name=None, item_id=None, 
+    def delete_item(self, item_type, item_name=None, item_id=None,
                     collection_name=None, collection_id=None, verbose=False):
         '''
         Delete the given item. Use carefully (this is different from archiving).
@@ -1169,11 +1169,11 @@ class Metabase_API():
 
 
 
-    def update_column(self, params, column_id=None, column_name=None, 
+    def update_column(self, params, column_id=None, column_name=None,
                       table_id=None, table_name=None, db_id=None, db_name=None):
         '''
         Update the column in data model by providing values for 'params'.
-        E.g. for changing the column type to 'Category' in data model, use: params={'semantic_type':'type/Category'} 
+        E.g. for changing the column type to 'Category' in data model, use: params={'semantic_type':'type/Category'}
         (For Metabase versions before v.39, use: params={'special_type':'type/Category'}).
         Other parameter values: https://www.metabase.com/docs/latest/api-documentation.html#put-apifieldid
         '''
@@ -1200,7 +1200,12 @@ class Metabase_API():
 
         return res_status_code
 
-
+    def create_dashboard(self, dashboard_name):
+        params = {
+            'name': dashboard_name,
+        }
+        id=self.post(f'/api/dashboard/{dashboard_name}', json=params)
+        return id
 
     def add_card_to_dashboard(self, card_id, dashboard_id):
         params = {

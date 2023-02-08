@@ -1204,15 +1204,14 @@ class Metabase_API():
         params = {
             'name': dashboard_name,
         }
-        id=self.post(f'/api/dashboard/{dashboard_name}', json=params)
-        return id
+        res=self.post(f'/api/dashboard', json=params)
+        return res
 
     def add_card_to_dashboard(self, card_id, dashboard_id):
         params = {
             'cardId': card_id
         }
         self.post(f'/api/dashboard/{dashboard_id}/cards', json=params)
-
 
 
     @staticmethod
